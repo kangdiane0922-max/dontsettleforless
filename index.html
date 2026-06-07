@@ -448,8 +448,6 @@ JSON.parse(localStorage.getItem("weeklyItems"))||[];
 
 
 
-
-
 function getTodayIndex(){let day=new Date().getDay();return(day+6)%7}
 
 function getWeekKey(){let date=new Date();let day=date.getDay();let diff=date.getDate()-day+(day===0?-6:1);let monday=new Date(date.setDate(diff));return monday.toISOString().slice(0,10)}
@@ -764,9 +762,11 @@ function addDday(){
 
   saveAll();
 
-  updateDdayList();
+updateDdayList();
 
-  updateCalendar();
+updateCalendar();
+
+updateWeeklyPlanner();
 
 }
 
@@ -778,9 +778,11 @@ function completeDday(index){
 
   saveAll();
 
-  updateDdayList();
+updateDdayList();
 
-  updateCalendar();
+updateCalendar();
+
+updateWeeklyPlanner();
 
 }
 
@@ -842,7 +844,13 @@ function addSubtask(projectIndex){
 
   titleInput.value="";memoInput.value="";
 
-  saveAll();updateProjectList();updateCalendar();
+  saveAll();
+
+updateProjectList();
+
+updateCalendar();
+
+updateWeeklyPlanner();
 
 }
 
@@ -858,7 +866,13 @@ function completeSubtask(projectIndex,subtaskIndex){
 
   projects[projectIndex].completedCount+=1;
 
-  saveAll();updateProjectList();updateCalendar();
+  saveAll();
+
+updateProjectList();
+
+updateCalendar();
+
+updateWeeklyPlanner();
 
 }
 
@@ -882,7 +896,13 @@ function deleteProject(projectIndex){
 
   projects.splice(projectIndex,1);
 
-  saveAll();updateProjectList();updateCalendar();
+  saveAll();
+
+  updateProjectList();
+
+  updateCalendar();
+
+  updateWeeklyPlanner();
 
 }
 
@@ -970,9 +990,11 @@ function scheduleSubtask(projectIndex,subtaskIndex,dateValue){
 
   saveAll();
 
-  updateProjectList();
+updateProjectList();
 
-  updateCalendar();
+updateCalendar();
+
+updateWeeklyPlanner();
 
 }
 
@@ -990,7 +1012,15 @@ function dropOnDate(dateKey){
 
   draggedTask=null;
 
-  saveAll();updateProjectList();updateCalendar();
+
+
+  saveAll();
+
+  updateProjectList();
+
+  updateCalendar();
+
+  updateWeeklyPlanner();
 
 }
 
@@ -1513,8 +1543,6 @@ function cleanOldWeeklyItems(){
 
 
 cleanOldWeeklyItems();
-
-
 
 
 
