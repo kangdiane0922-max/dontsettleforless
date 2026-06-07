@@ -12,12 +12,13 @@ body{margin:0;min-height:100vh;background:skyblue;font-family:Arial,sans-serif;p
 .stat-title{display:flex;justify-content:space-between;font-weight:bold;margin-bottom:6px}
 .bar{height:22px;border:2px solid #222;background:#eee}
 .fill{height:100%;background:hotpink;width:0%}
-input{width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box}
+input,textarea{width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box}
+textarea{min-height:80px;resize:vertical}
 button{padding:10px;border:2px solid #222;background:white;font-weight:bold;cursor:pointer}
 .add-button,.reset-button{width:100%}
 .reset-button{margin-bottom:16px;color:red}
-.routine-card,.dday-card{border:2px solid #222;padding:14px;margin-top:12px;background:#f7f7f7}
-.routine-top,.dday-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.routine-card,.dday-card,.project-card{border:2px solid #222;padding:14px;margin-top:12px;background:#f7f7f7}
+.routine-top,.dday-top,.project-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .routine-left{display:flex;align-items:center;gap:10px;font-weight:bold}
 .delete-button,.complete-button{color:red}
 .reward-text{margin-top:8px;font-size:14px}
@@ -33,6 +34,14 @@ button{padding:10px;border:2px solid #222;background:white;font-weight:bold;curs
 .month-cell.empty{background:transparent}
 .dday-name{font-weight:bold}
 .dday-count{font-size:20px;font-weight:bold;color:hotpink}
+.project-title{font-size:22px;font-weight:bold}
+.project-progress-text{font-weight:bold;color:hotpink}
+.project-progress-bar{height:20px;border:2px solid #222;background:#eee;margin:10px 0 16px}
+.project-progress-fill{height:100%;background:hotpink;width:0%}
+.subtask-scroll{display:flex;gap:12px;overflow-x:auto;padding:10px 0}
+.subtask-card{min-width:190px;border:2px solid #222;background:white;padding:12px}
+.subtask-card.done{opacity:.6}
+.subtask-title{font-weight:bold;margin-bottom:8px}
 </style>
 </head>
 
@@ -50,24 +59,13 @@ button{padding:10px;border:2px solid #222;background:white;font-weight:bold;curs
 
 <div class="box">
   <h2>Routine</h2>
-
   <label>Routine name</label>
   <input id="routineName" type="text" placeholder="ex) Cycling 1 hour">
-
-  <label>Strength XP</label>
-  <input id="strengthReward" type="number" value="0">
-
-  <label>Intelligence XP</label>
-  <input id="intelligenceReward" type="number" value="0">
-
-  <label>Health XP</label>
-  <input id="healthReward" type="number" value="0">
-
-  <label>Discipline XP</label>
-  <input id="disciplineReward" type="number" value="0">
-
+  <label>Strength XP</label><input id="strengthReward" type="number" value="0">
+  <label>Intelligence XP</label><input id="intelligenceReward" type="number" value="0">
+  <label>Health XP</label><input id="healthReward" type="number" value="0">
+  <label>Discipline XP</label><input id="disciplineReward" type="number" value="0">
   <button class="add-button" onclick="addRoutine()">Add Routine</button>
-
   <div id="routineList"></div>
 </div>
 
@@ -87,71 +85,39 @@ button{padding:10px;border:2px solid #222;background:white;font-weight:bold;curs
 
 <div class="box">
   <h2>D-Day</h2>
-
   <label>Schedule name</label>
   <input id="ddayName" type="text" placeholder="ex) Exam day">
-
   <label>Target date</label>
   <input id="ddayDate" type="date">
-
   <button class="add-button" onclick="addDday()">Add D-Day</button>
-
   <div id="ddayList"></div>
 </div>
 
+<div class="box">
+  <h2>Projects</h2>
+  <label>Project name</label>
+  <input id="projectName" type="text" placeholder="ex) Electrical exam">
+  <button class="add-button" onclick="addProject()">Add Project</button>
+  <div id="projectList"></div>
+</div>
+
 <script>
-let today = new Date().toDateString();
+let today=new Date().toDateString();
 
-function getTodayIndex(){
-  let day = new Date().getDay();
-  return (day + 6) % 7;
-}
+function getTodayIndex(){let day=new Date().getDay();return(day+6)%7}
+function getWeekKey(){let date=new Date();let day=date.getDay();let diff=date.getDate()-day+(day===0?-6:1);let monday=new Date(date.setDate(diff));return monday.toISOString().slice(0,10)}
+function getMonthKey(){let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+function getTodayDateNumber(){return new Date().getDate()}
+function getDaysInMonth(){let d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}
+function getFirstDayBlankCount(){let d=new Date();let first=new Date(d.getFullYear(),d.getMonth(),1).getDay();return(first+6)%7}
+function getTodayOnly(){let now=new Date();return new Date(now.getFullYear(),now.getMonth(),now.getDate())}
+function getDaysLeft(targetDate){let todayOnly=getTodayOnly();let target=new Date(targetDate+"T00:00:00");let diff=target-todayOnly;return Math.ceil(diff/(1000*60*60*24))}
 
-function getWeekKey(){
-  let date = new Date();
-  let day = date.getDay();
-  let diff = date.getDate() - day + (day === 0 ? -6 : 1);
-  let monday = new Date(date.setDate(diff));
-  return monday.toISOString().slice(0,10);
-}
+let todayIndex=getTodayIndex();
+let currentWeekKey=getWeekKey();
+let currentMonthKey=getMonthKey();
 
-function getMonthKey(){
-  let d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2,"0");
-}
-
-function getTodayDateNumber(){
-  return new Date().getDate();
-}
-
-function getDaysInMonth(){
-  let d = new Date();
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-}
-
-function getFirstDayBlankCount(){
-  let d = new Date();
-  let first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
-  return (first + 6) % 7;
-}
-
-function getTodayOnly(){
-  let now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-function getDaysLeft(targetDate){
-  let todayOnly = getTodayOnly();
-  let target = new Date(targetDate + "T00:00:00");
-  let diff = target - todayOnly;
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-
-let todayIndex = getTodayIndex();
-let currentWeekKey = getWeekKey();
-let currentMonthKey = getMonthKey();
-
-let player = JSON.parse(localStorage.getItem("playerData")) || {
+let player=JSON.parse(localStorage.getItem("playerData"))||{
   name:"DIANA",
   stats:{
     strength:{level:1,xp:0},
@@ -161,89 +127,76 @@ let player = JSON.parse(localStorage.getItem("playerData")) || {
   }
 };
 
-let routines = JSON.parse(localStorage.getItem("routineData")) || [];
-let ddays = JSON.parse(localStorage.getItem("ddayData")) || [];
+let routines=JSON.parse(localStorage.getItem("routineData"))||[];
+let ddays=JSON.parse(localStorage.getItem("ddayData"))||[];
+let projects=JSON.parse(localStorage.getItem("projectData"))||[];
 
-let monthly = JSON.parse(localStorage.getItem("monthlyData")) || {
-  monthKey: currentMonthKey,
-  checkedDays: {},
-  bonusGiven: false
+let monthly=JSON.parse(localStorage.getItem("monthlyData"))||{
+  monthKey:currentMonthKey,
+  checkedDays:{},
+  bonusGiven:false
 };
 
-let lastVisitDate = localStorage.getItem("lastVisitDate");
-let savedWeekKey = localStorage.getItem("weekKey");
+let lastVisitDate=localStorage.getItem("lastVisitDate");
+let savedWeekKey=localStorage.getItem("weekKey");
 
-if(monthly.monthKey !== currentMonthKey){
-  monthly = {
-    monthKey: currentMonthKey,
-    checkedDays: {},
-    bonusGiven: false
-  };
-  localStorage.setItem("monthlyData", JSON.stringify(monthly));
+if(monthly.monthKey!==currentMonthKey){
+  monthly={monthKey:currentMonthKey,checkedDays:{},bonusGiven:false};
+  localStorage.setItem("monthlyData",JSON.stringify(monthly));
 }
 
-if(savedWeekKey !== currentWeekKey){
+if(savedWeekKey!==currentWeekKey){
   routines.forEach(function(routine){
-    routine.weekly = [false,false,false,false,false,false,false];
-    routine.weeklyBonusGiven = false;
-    routine.completed = false;
+    routine.weekly=[false,false,false,false,false,false,false];
+    routine.weeklyBonusGiven=false;
+    routine.completed=false;
   });
-  localStorage.setItem("weekKey", currentWeekKey);
+  localStorage.setItem("weekKey",currentWeekKey);
 }
 
-if(lastVisitDate !== today){
-  routines.forEach(function(routine){
-    routine.completed = false;
-  });
-  localStorage.setItem("lastVisitDate", today);
+if(lastVisitDate!==today){
+  routines.forEach(function(routine){routine.completed=false});
+  localStorage.setItem("lastVisitDate",today);
 }
 
 routines.forEach(function(routine){
-  if(!routine.id) routine.id = Date.now() + Math.random();
-  if(!routine.weekly) routine.weekly = [false,false,false,false,false,false,false];
-  if(routine.weeklyBonusGiven === undefined) routine.weeklyBonusGiven = false;
+  if(!routine.id)routine.id=Date.now()+Math.random();
+  if(!routine.weekly)routine.weekly=[false,false,false,false,false,false,false];
+  if(routine.weeklyBonusGiven===undefined)routine.weeklyBonusGiven=false;
 });
 
 function cleanExpiredDdays(){
-  ddays = ddays.filter(function(item){
-    return getDaysLeft(item.date) >= 0;
-  });
+  ddays=ddays.filter(function(item){return getDaysLeft(item.date)>=0});
 }
-
 cleanExpiredDdays();
 
 function saveAll(){
-  localStorage.setItem("playerData", JSON.stringify(player));
-  localStorage.setItem("routineData", JSON.stringify(routines));
-  localStorage.setItem("lastVisitDate", today);
-  localStorage.setItem("weekKey", currentWeekKey);
-  localStorage.setItem("monthlyData", JSON.stringify(monthly));
-  localStorage.setItem("ddayData", JSON.stringify(ddays));
+  localStorage.setItem("playerData",JSON.stringify(player));
+  localStorage.setItem("routineData",JSON.stringify(routines));
+  localStorage.setItem("lastVisitDate",today);
+  localStorage.setItem("weekKey",currentWeekKey);
+  localStorage.setItem("monthlyData",JSON.stringify(monthly));
+  localStorage.setItem("ddayData",JSON.stringify(ddays));
+  localStorage.setItem("projectData",JSON.stringify(projects));
 }
 
-function addXp(statName, amount){
-  let stat = player.stats[statName];
-  stat.xp += amount;
-  while(stat.xp >= 100){
-    stat.xp -= 100;
-    stat.level += 1;
-  }
+function addXp(statName,amount){
+  let stat=player.stats[statName];
+  stat.xp+=amount;
+  while(stat.xp>=100){stat.xp-=100;stat.level+=1}
 }
 
-function removeXp(statName, amount){
-  let stat = player.stats[statName];
-  stat.xp -= amount;
-  while(stat.xp < 0 && stat.level > 1){
-    stat.level -= 1;
-    stat.xp += 100;
-  }
-  if(stat.level === 1 && stat.xp < 0) stat.xp = 0;
+function removeXp(statName,amount){
+  let stat=player.stats[statName];
+  stat.xp-=amount;
+  while(stat.xp<0&&stat.level>1){stat.level-=1;stat.xp+=100}
+  if(stat.level===1&&stat.xp<0)stat.xp=0;
 }
 
 function resetStats(){
-  if(!confirm("Reset all stats, weekly progress, monthly progress, and routine checks?")) return;
+  if(!confirm("Reset all stats, weekly progress, monthly progress, and routine checks?"))return;
 
-  player.stats = {
+  player.stats={
     strength:{level:1,xp:0},
     intelligence:{level:1,xp:0},
     health:{level:1,xp:0},
@@ -251,13 +204,13 @@ function resetStats(){
   };
 
   routines.forEach(function(routine){
-    routine.completed = false;
-    routine.weekly = [false,false,false,false,false,false,false];
-    routine.weeklyBonusGiven = false;
+    routine.completed=false;
+    routine.weekly=[false,false,false,false,false,false,false];
+    routine.weeklyBonusGiven=false;
   });
 
-  monthly.checkedDays = {};
-  monthly.bonusGiven = false;
+  monthly.checkedDays={};
+  monthly.bonusGiven=false;
 
   saveAll();
   updateStatus();
@@ -267,30 +220,24 @@ function resetStats(){
 }
 
 function updateStatus(){
-  document.getElementById("playerName").textContent = player.name;
-
+  document.getElementById("playerName").textContent=player.name;
   for(let statName in player.stats){
-    let stat = player.stats[statName];
-    document.getElementById(statName + "Text").textContent =
-      "Lv." + stat.level + " " + stat.xp + "/100";
-    document.getElementById(statName + "Bar").style.width = stat.xp + "%";
+    let stat=player.stats[statName];
+    document.getElementById(statName+"Text").textContent="Lv."+stat.level+" "+stat.xp+"/100";
+    document.getElementById(statName+"Bar").style.width=stat.xp+"%";
   }
 }
 
 function addRoutine(){
-  let name = document.getElementById("routineName").value.trim();
+  let name=document.getElementById("routineName").value.trim();
+  if(name===""){alert("Routine name을 입력하세요.");return}
 
-  if(name === ""){
-    alert("Routine name을 입력하세요.");
-    return;
-  }
-
-  let routine = {
-    id: Date.now(),
-    name: name,
-    completed: false,
-    weekly: [false,false,false,false,false,false,false],
-    weeklyBonusGiven: false,
+  let routine={
+    id:Date.now(),
+    name:name,
+    completed:false,
+    weekly:[false,false,false,false,false,false,false],
+    weeklyBonusGiven:false,
     rewards:{
       strength:Number(document.getElementById("strengthReward").value),
       intelligence:Number(document.getElementById("intelligenceReward").value),
@@ -301,11 +248,11 @@ function addRoutine(){
 
   routines.push(routine);
 
-  document.getElementById("routineName").value = "";
-  document.getElementById("strengthReward").value = 0;
-  document.getElementById("intelligenceReward").value = 0;
-  document.getElementById("healthReward").value = 0;
-  document.getElementById("disciplineReward").value = 0;
+  document.getElementById("routineName").value="";
+  document.getElementById("strengthReward").value=0;
+  document.getElementById("intelligenceReward").value=0;
+  document.getElementById("healthReward").value=0;
+  document.getElementById("disciplineReward").value=0;
 
   saveAll();
   updateRoutineList();
@@ -314,36 +261,30 @@ function addRoutine(){
 }
 
 function checkWeeklyBonus(routine){
-  let fullWeek = routine.weekly.every(function(day){ return day === true; });
-
-  if(fullWeek && !routine.weeklyBonusGiven){
-    addXp("discipline", 10);
-    routine.weeklyBonusGiven = true;
-    alert(routine.name + " weekly bonus! Discipline +10 XP");
+  let fullWeek=routine.weekly.every(function(day){return day===true});
+  if(fullWeek&&!routine.weeklyBonusGiven){
+    addXp("discipline",10);
+    routine.weeklyBonusGiven=true;
+    alert(routine.name+" weekly bonus! Discipline +10 XP");
   }
 }
 
 function updateMonthlyTracker(){
-  let todayNumber = getTodayDateNumber();
+  let todayNumber=getTodayDateNumber();
+  let allDoneToday=routines.length>0&&routines.every(function(routine){return routine.completed===true});
 
-  let allDoneToday = routines.length > 0 && routines.every(function(routine){
-    return routine.completed === true;
-  });
+  if(allDoneToday){monthly.checkedDays[todayNumber]=true}
 
-  if(allDoneToday){
-    monthly.checkedDays[todayNumber] = true;
+  let daysInMonth=getDaysInMonth();
+  let completedCount=0;
+
+  for(let i=1;i<=daysInMonth;i++){
+    if(monthly.checkedDays[i])completedCount++;
   }
 
-  let daysInMonth = getDaysInMonth();
-  let completedCount = 0;
-
-  for(let i = 1; i <= daysInMonth; i++){
-    if(monthly.checkedDays[i]) completedCount++;
-  }
-
-  if(completedCount === daysInMonth && !monthly.bonusGiven){
-    addXp("discipline", 50);
-    monthly.bonusGiven = true;
+  if(completedCount===daysInMonth&&!monthly.bonusGiven){
+    addXp("discipline",50);
+    monthly.bonusGiven=true;
     alert("Monthly bonus! Discipline +50 XP");
   }
 
@@ -353,20 +294,15 @@ function updateMonthlyTracker(){
 }
 
 function toggleRoutine(index){
-  let routine = routines[index];
-
-  routine.completed = !routine.completed;
-  routine.weekly[todayIndex] = routine.completed;
+  let routine=routines[index];
+  routine.completed=!routine.completed;
+  routine.weekly[todayIndex]=routine.completed;
 
   for(let stat in routine.rewards){
-    let amount = routine.rewards[stat];
-
-    if(amount > 0){
-      if(routine.completed){
-        addXp(stat, amount);
-      }else{
-        removeXp(stat, amount);
-      }
+    let amount=routine.rewards[stat];
+    if(amount>0){
+      if(routine.completed){addXp(stat,amount)}
+      else{removeXp(stat,amount)}
     }
   }
 
@@ -380,7 +316,6 @@ function toggleRoutine(index){
 
 function deleteRoutine(index){
   routines.splice(index,1);
-
   saveAll();
   updateStatus();
   updateRoutineList();
@@ -389,125 +324,104 @@ function deleteRoutine(index){
 }
 
 function updateRoutineList(){
-  let list = document.getElementById("routineList");
-  list.innerHTML = "";
+  let list=document.getElementById("routineList");
+  list.innerHTML="";
 
   routines.forEach(function(routine,index){
-    let rewardText = "";
-
+    let rewardText="";
     for(let stat in routine.rewards){
-      if(routine.rewards[stat] > 0){
-        rewardText += stat + " +" + routine.rewards[stat] + " XP<br>";
+      if(routine.rewards[stat]>0){
+        rewardText+=stat+" +"+routine.rewards[stat]+" XP<br>";
       }
     }
 
-    let card = document.createElement("div");
-    card.className = "routine-card";
-
-    card.innerHTML =
-      '<div class="routine-top">' +
-        '<div class="routine-left">' +
-          '<input type="checkbox" ' + (routine.completed ? "checked" : "") +
-          ' onchange="toggleRoutine(' + index + ')">' +
-          '<span>' + routine.name + '</span>' +
-        '</div>' +
-        '<button class="delete-button" onclick="deleteRoutine(' + index + ')">Delete</button>' +
-      '</div>' +
-      '<div class="reward-text">' + rewardText + '</div>';
+    let card=document.createElement("div");
+    card.className="routine-card";
+    card.innerHTML=
+      '<div class="routine-top">'+
+        '<div class="routine-left">'+
+          '<input type="checkbox" '+(routine.completed?"checked":"")+' onchange="toggleRoutine('+index+')">'+
+          '<span>'+routine.name+'</span>'+
+        '</div>'+
+        '<button class="delete-button" onclick="deleteRoutine('+index+')">Delete</button>'+
+      '</div>'+
+      '<div class="reward-text">'+rewardText+'</div>';
 
     list.appendChild(card);
   });
 }
 
 function updateWeeklyList(){
-  let list = document.getElementById("weeklyList");
-  list.innerHTML = "";
+  let list=document.getElementById("weeklyList");
+  list.innerHTML="";
 
   routines.forEach(function(routine){
-    let row = document.createElement("div");
-    row.className = "weekly-row";
+    let row=document.createElement("div");
+    row.className="weekly-row";
+    let boxes="";
 
-    let boxes = "";
-
-    for(let i = 0; i < 7; i++){
-      boxes += '<input class="week-box" type="checkbox" disabled ' +
-        (routine.weekly[i] ? "checked" : "") + '>';
+    for(let i=0;i<7;i++){
+      boxes+='<input class="week-box" type="checkbox" disabled '+(routine.weekly[i]?"checked":"")+'>';
     }
 
-    row.innerHTML = '<div class="weekly-name">' + routine.name + '</div>' + boxes;
+    row.innerHTML='<div class="weekly-name">'+routine.name+'</div>'+boxes;
     list.appendChild(row);
   });
 }
 
 function updateMonthlyGrid(){
-  let d = new Date();
-  let year = d.getFullYear();
-  let month = d.getMonth() + 1;
-  let daysInMonth = getDaysInMonth();
-  let blanks = getFirstDayBlankCount();
+  let d=new Date();
+  let year=d.getFullYear();
+  let month=d.getMonth()+1;
+  let daysInMonth=getDaysInMonth();
+  let blanks=getFirstDayBlankCount();
 
-  document.getElementById("monthTitle").textContent = year + "년 " + month + "월";
+  document.getElementById("monthTitle").textContent=year+"년 "+month+"월";
 
-  let completedCount = 0;
-  for(let i = 1; i <= daysInMonth; i++){
-    if(monthly.checkedDays[i]) completedCount++;
+  let completedCount=0;
+  for(let i=1;i<=daysInMonth;i++){
+    if(monthly.checkedDays[i])completedCount++;
   }
 
-  document.getElementById("monthProgress").textContent =
-    completedCount + " / " + daysInMonth + " days completed";
+  document.getElementById("monthProgress").textContent=completedCount+" / "+daysInMonth+" days completed";
 
-  let grid = document.getElementById("monthlyGrid");
-  grid.innerHTML = "";
+  let grid=document.getElementById("monthlyGrid");
+  grid.innerHTML="";
 
-  let dayNames = ["M","T","W","T","F","S","S"];
+  let dayNames=["M","T","W","T","F","S","S"];
   dayNames.forEach(function(name){
-    let cell = document.createElement("div");
-    cell.className = "month-day-name";
-    cell.textContent = name;
+    let cell=document.createElement("div");
+    cell.className="month-day-name";
+    cell.textContent=name;
     grid.appendChild(cell);
   });
 
-  for(let i = 0; i < blanks; i++){
-    let empty = document.createElement("div");
-    empty.className = "month-cell empty";
+  for(let i=0;i<blanks;i++){
+    let empty=document.createElement("div");
+    empty.className="month-cell empty";
     grid.appendChild(empty);
   }
 
-  for(let day = 1; day <= daysInMonth; day++){
-    let cell = document.createElement("div");
-    cell.className = "month-cell" + (monthly.checkedDays[day] ? " done" : "");
-    cell.textContent = day;
+  for(let day=1;day<=daysInMonth;day++){
+    let cell=document.createElement("div");
+    cell.className="month-cell"+(monthly.checkedDays[day]?" done":"");
+    cell.textContent=day;
     grid.appendChild(cell);
   }
 }
 
 function addDday(){
-  let name = document.getElementById("ddayName").value.trim();
-  let date = document.getElementById("ddayDate").value;
+  let name=document.getElementById("ddayName").value.trim();
+  let date=document.getElementById("ddayDate").value;
 
-  if(name === ""){
-    alert("Schedule name을 입력하세요.");
-    return;
-  }
+  if(name===""){alert("Schedule name을 입력하세요.");return}
+  if(date===""){alert("Target date를 선택하세요.");return}
+  if(getDaysLeft(date)<0){alert("지난 날짜는 추가할 수 없습니다.");return}
 
-  if(date === ""){
-    alert("Target date를 선택하세요.");
-    return;
-  }
+  ddays.push({id:Date.now(),name:name,date:date});
 
-  if(getDaysLeft(date) < 0){
-    alert("지난 날짜는 추가할 수 없습니다.");
-    return;
-  }
-
-  ddays.push({
-    id: Date.now(),
-    name: name,
-    date: date
-  });
-
-  document.getElementById("ddayName").value = "";
-  document.getElementById("ddayDate").value = "";
+  document.getElementById("ddayName").value="";
+  document.getElementById("ddayDate").value="";
 
   saveAll();
   updateDdayList();
@@ -522,28 +436,25 @@ function completeDday(index){
 function updateDdayList(){
   cleanExpiredDdays();
 
-  ddays.sort(function(a,b){
-    return getDaysLeft(a.date) - getDaysLeft(b.date);
-  });
+  ddays.sort(function(a,b){return getDaysLeft(a.date)-getDaysLeft(b.date)});
 
-  let list = document.getElementById("ddayList");
-  list.innerHTML = "";
+  let list=document.getElementById("ddayList");
+  list.innerHTML="";
 
   ddays.forEach(function(item,index){
-    let daysLeft = getDaysLeft(item.date);
-    let ddayText = daysLeft === 0 ? "D-Day" : "D-" + daysLeft;
+    let daysLeft=getDaysLeft(item.date);
+    let ddayText=daysLeft===0?"D-Day":"D-"+daysLeft;
 
-    let card = document.createElement("div");
-    card.className = "dday-card";
-
-    card.innerHTML =
-      '<div class="dday-top">' +
-        '<div>' +
-          '<div class="dday-name">' + item.name + '</div>' +
-          '<div>' + item.date + '</div>' +
-        '</div>' +
-        '<div class="dday-count">' + ddayText + '</div>' +
-        '<button class="complete-button" onclick="completeDday(' + index + ')">Complete</button>' +
+    let card=document.createElement("div");
+    card.className="dday-card";
+    card.innerHTML=
+      '<div class="dday-top">'+
+        '<div>'+
+          '<div class="dday-name">'+item.name+'</div>'+
+          '<div>'+item.date+'</div>'+
+        '</div>'+
+        '<div class="dday-count">'+ddayText+'</div>'+
+        '<button class="complete-button" onclick="completeDday('+index+')">Complete</button>'+
       '</div>';
 
     list.appendChild(card);
@@ -552,12 +463,125 @@ function updateDdayList(){
   saveAll();
 }
 
+function addProject(){
+  let name=document.getElementById("projectName").value.trim();
+  if(name===""){alert("Project name을 입력하세요.");return}
+
+  projects.push({
+    id:Date.now(),
+    name:name,
+    subtasks:[]
+  });
+
+  document.getElementById("projectName").value="";
+
+  saveAll();
+  updateProjectList();
+}
+
+function addSubtask(projectIndex){
+  let titleInput=document.getElementById("subtaskTitle-"+projectIndex);
+  let memoInput=document.getElementById("subtaskMemo-"+projectIndex);
+
+  let title=titleInput.value.trim();
+  let memo=memoInput.value.trim();
+
+  if(title===""){alert("Sub task title을 입력하세요.");return}
+
+  projects[projectIndex].subtasks.push({
+    id:Date.now(),
+    title:title,
+    memo:memo,
+    done:false
+  });
+
+  titleInput.value="";
+  memoInput.value="";
+
+  saveAll();
+  updateProjectList();
+}
+
+function toggleSubtask(projectIndex,subtaskIndex){
+  projects[projectIndex].subtasks[subtaskIndex].done=!projects[projectIndex].subtasks[subtaskIndex].done;
+  saveAll();
+  updateProjectList();
+}
+
+function updateSubtaskMemo(projectIndex,subtaskIndex,value){
+  projects[projectIndex].subtasks[subtaskIndex].memo=value;
+  saveAll();
+}
+
+function completeProject(projectIndex){
+  if(!confirm("Complete this project and delete it?"))return;
+  projects.splice(projectIndex,1);
+  saveAll();
+  updateProjectList();
+}
+
+function deleteProject(projectIndex){
+  if(!confirm("Delete this project?"))return;
+  projects.splice(projectIndex,1);
+  saveAll();
+  updateProjectList();
+}
+
+function getProjectProgress(project){
+  if(project.subtasks.length===0)return 0;
+  let doneCount=project.subtasks.filter(function(task){return task.done}).length;
+  return Math.round((doneCount/project.subtasks.length)*100);
+}
+
+function updateProjectList(){
+  let list=document.getElementById("projectList");
+  list.innerHTML="";
+
+  projects.forEach(function(project,projectIndex){
+    let progress=getProjectProgress(project);
+    let doneCount=project.subtasks.filter(function(task){return task.done}).length;
+    let total=project.subtasks.length;
+
+    let subtaskCards="";
+
+    project.subtasks.forEach(function(task,subtaskIndex){
+      subtaskCards+=
+        '<div class="subtask-card '+(task.done?"done":"")+'">'+
+          '<div class="subtask-title">'+task.title+'</div>'+
+          '<textarea placeholder="Memo" oninput="updateSubtaskMemo('+projectIndex+','+subtaskIndex+', this.value)">'+task.memo+'</textarea>'+
+          '<button onclick="toggleSubtask('+projectIndex+','+subtaskIndex+')">'+(task.done?"Undo":"Complete")+'</button>'+
+        '</div>';
+    });
+
+    let card=document.createElement("div");
+    card.className="project-card";
+
+    card.innerHTML=
+      '<div class="project-top">'+
+        '<div class="project-title">'+project.name+'</div>'+
+        '<button class="delete-button" onclick="deleteProject('+projectIndex+')">Delete</button>'+
+      '</div>'+
+      '<div class="project-progress-text">'+progress+'% completed ('+doneCount+'/'+total+')</div>'+
+      '<div class="project-progress-bar"><div class="project-progress-fill" style="width:'+progress+'%"></div></div>'+
+      '<label>Sub task title</label>'+
+      '<input id="subtaskTitle-'+projectIndex+'" type="text" placeholder="ex) Chapter 1">'+
+      '<label>Sub task memo</label>'+
+      '<textarea id="subtaskMemo-'+projectIndex+'" placeholder="Write details here"></textarea>'+
+      '<button class="add-button" onclick="addSubtask('+projectIndex+')">Add Sub Task</button>'+
+      '<div class="subtask-scroll">'+subtaskCards+'</div>'+
+      (progress===100&&total>0?'<button class="complete-button" onclick="completeProject('+projectIndex+')">Project Complete</button>':'');
+
+    list.appendChild(card);
+  });
+}
+
 saveAll();
 updateStatus();
 updateRoutineList();
 updateWeeklyList();
 updateMonthlyGrid();
 updateDdayList();
+updateProjectList();
 </script>
 
 </body>
