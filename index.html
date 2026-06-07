@@ -6,120 +6,31 @@
 <title>My RPG Page</title>
 
 <style>
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: skyblue;
-  font-family: Arial, sans-serif;
-  padding: 30px;
-}
-
-.box {
-  background: white;
-  border: 3px solid #222;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 720px;
-  margin: 0 auto 24px auto;
-}
-
-.stat { margin: 18px 0; }
-
-.stat-title {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-
-.bar {
-  height: 22px;
-  border: 2px solid #222;
-  background: #eee;
-}
-
-.fill {
-  height: 100%;
-  background: hotpink;
-  width: 0%;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0 12px 0;
-  box-sizing: border-box;
-}
-
-button {
-  padding: 10px;
-  border: 2px solid #222;
-  background: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.add-button,
-.reset-button {
-  width: 100%;
-}
-
-.reset-button {
-  margin-bottom: 16px;
-  color: red;
-}
-
-.routine-card {
-  border: 2px solid #222;
-  padding: 14px;
-  margin-top: 12px;
-  background: #f7f7f7;
-}
-
-.routine-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.routine-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: bold;
-}
-
-.delete-button {
-  color: red;
-}
-
-.reward-text {
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-.weekly-row {
-  display: grid;
-  grid-template-columns: 1.5fr repeat(7, 40px);
-  gap: 8px;
-  align-items: center;
-  margin: 10px 0;
-}
-
-.weekly-header {
-  font-weight: bold;
-  text-align: center;
-}
-
-.weekly-name {
-  font-weight: bold;
-}
-
-.week-box {
-  width: 26px;
-  height: 26px;
-  accent-color: hotpink;
-}
+body{margin:0;min-height:100vh;background:skyblue;font-family:Arial,sans-serif;padding:30px}
+.box{background:white;border:3px solid #222;border-radius:16px;padding:24px;max-width:720px;margin:0 auto 24px}
+.stat{margin:18px 0}
+.stat-title{display:flex;justify-content:space-between;font-weight:bold;margin-bottom:6px}
+.bar{height:22px;border:2px solid #222;background:#eee}
+.fill{height:100%;background:hotpink;width:0%}
+input{width:100%;padding:10px;margin:6px 0 12px;box-sizing:border-box}
+button{padding:10px;border:2px solid #222;background:white;font-weight:bold;cursor:pointer}
+.add-button,.reset-button{width:100%}
+.reset-button{margin-bottom:16px;color:red}
+.routine-card{border:2px solid #222;padding:14px;margin-top:12px;background:#f7f7f7}
+.routine-top{display:flex;justify-content:space-between;align-items:center}
+.routine-left{display:flex;align-items:center;gap:10px;font-weight:bold}
+.delete-button{color:red}
+.reward-text{margin-top:8px;font-size:14px}
+.weekly-row{display:grid;grid-template-columns:1.5fr repeat(7,40px);gap:8px;align-items:center;margin:10px 0}
+.weekly-header{font-weight:bold;text-align:center}
+.weekly-name{font-weight:bold}
+.week-box{width:26px;height:26px;accent-color:hotpink}
+.month-title{text-align:center}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;max-width:420px;margin:20px auto}
+.month-day-name{text-align:center;font-weight:bold}
+.month-cell{aspect-ratio:1/1;border-radius:8px;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:12px}
+.month-cell.done{background:#2ecc71;color:white;font-weight:bold}
+.month-cell.empty{background:transparent}
 </style>
 </head>
 
@@ -127,28 +38,12 @@ button {
 
 <div class="box">
   <h1 id="playerName">DIANA</h1>
-
   <button class="reset-button" onclick="resetStats()">Reset All Stats</button>
 
-  <div class="stat">
-    <div class="stat-title"><span>Strength</span><span id="strengthText"></span></div>
-    <div class="bar"><div id="strengthBar" class="fill"></div></div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-title"><span>Intelligence</span><span id="intelligenceText"></span></div>
-    <div class="bar"><div id="intelligenceBar" class="fill"></div></div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-title"><span>Health</span><span id="healthText"></span></div>
-    <div class="bar"><div id="healthBar" class="fill"></div></div>
-  </div>
-
-  <div class="stat">
-    <div class="stat-title"><span>Discipline</span><span id="disciplineText"></span></div>
-    <div class="bar"><div id="disciplineBar" class="fill"></div></div>
-  </div>
+  <div class="stat"><div class="stat-title"><span>Strength</span><span id="strengthText"></span></div><div class="bar"><div id="strengthBar" class="fill"></div></div></div>
+  <div class="stat"><div class="stat-title"><span>Intelligence</span><span id="intelligenceText"></span></div><div class="bar"><div id="intelligenceBar" class="fill"></div></div></div>
+  <div class="stat"><div class="stat-title"><span>Health</span><span id="healthText"></span></div><div class="bar"><div id="healthBar" class="fill"></div></div></div>
+  <div class="stat"><div class="stat-title"><span>Discipline</span><span id="disciplineText"></span></div><div class="bar"><div id="disciplineBar" class="fill"></div></div></div>
 </div>
 
 <div class="box">
@@ -176,141 +71,164 @@ button {
 
 <div class="box">
   <h2>Weekly Habits</h2>
-
   <div class="weekly-row">
-    <div></div>
-    <div class="weekly-header">M</div>
-    <div class="weekly-header">T</div>
-    <div class="weekly-header">W</div>
-    <div class="weekly-header">T</div>
-    <div class="weekly-header">F</div>
-    <div class="weekly-header">S</div>
-    <div class="weekly-header">S</div>
+    <div></div><div class="weekly-header">M</div><div class="weekly-header">T</div><div class="weekly-header">W</div><div class="weekly-header">T</div><div class="weekly-header">F</div><div class="weekly-header">S</div><div class="weekly-header">S</div>
   </div>
-
   <div id="weeklyList"></div>
+</div>
+
+<div class="box">
+  <h2 class="month-title" id="monthTitle"></h2>
+  <p class="month-title" id="monthProgress"></p>
+  <div class="month-grid" id="monthlyGrid"></div>
 </div>
 
 <script>
 let today = new Date().toDateString();
 
-function getTodayIndex() {
+function getTodayIndex(){
   let day = new Date().getDay();
   return (day + 6) % 7;
 }
 
-function getWeekKey() {
+function getWeekKey(){
   let date = new Date();
   let day = date.getDay();
   let diff = date.getDate() - day + (day === 0 ? -6 : 1);
   let monday = new Date(date.setDate(diff));
-  return monday.toISOString().slice(0, 10);
+  return monday.toISOString().slice(0,10);
+}
+
+function getMonthKey(){
+  let d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2,"0");
+}
+
+function getTodayDateNumber(){
+  return new Date().getDate();
+}
+
+function getDaysInMonth(){
+  let d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
+
+function getFirstDayBlankCount(){
+  let d = new Date();
+  let first = new Date(d.getFullYear(), d.getMonth(), 1).getDay();
+  return (first + 6) % 7;
 }
 
 let todayIndex = getTodayIndex();
 let currentWeekKey = getWeekKey();
+let currentMonthKey = getMonthKey();
 
 let player = JSON.parse(localStorage.getItem("playerData")) || {
-  name: "DIANA",
-  stats: {
-    strength: { level: 1, xp: 0 },
-    intelligence: { level: 1, xp: 0 },
-    health: { level: 1, xp: 0 },
-    discipline: { level: 1, xp: 0 }
+  name:"DIANA",
+  stats:{
+    strength:{level:1,xp:0},
+    intelligence:{level:1,xp:0},
+    health:{level:1,xp:0},
+    discipline:{level:1,xp:0}
   }
 };
 
 let routines = JSON.parse(localStorage.getItem("routineData")) || [];
+let monthly = JSON.parse(localStorage.getItem("monthlyData")) || {
+  monthKey: currentMonthKey,
+  checkedDays: {},
+  bonusGiven: false
+};
+
 let lastVisitDate = localStorage.getItem("lastVisitDate");
 let savedWeekKey = localStorage.getItem("weekKey");
 
-if (savedWeekKey !== currentWeekKey) {
-  routines.forEach(function(routine) {
-    routine.weekly = [false, false, false, false, false, false, false];
+if(monthly.monthKey !== currentMonthKey){
+  monthly = {
+    monthKey: currentMonthKey,
+    checkedDays: {},
+    bonusGiven: false
+  };
+  localStorage.setItem("monthlyData", JSON.stringify(monthly));
+}
+
+if(savedWeekKey !== currentWeekKey){
+  routines.forEach(function(routine){
+    routine.weekly = [false,false,false,false,false,false,false];
     routine.weeklyBonusGiven = false;
     routine.completed = false;
   });
   localStorage.setItem("weekKey", currentWeekKey);
 }
 
-if (lastVisitDate !== today) {
-  routines.forEach(function(routine) {
+if(lastVisitDate !== today){
+  routines.forEach(function(routine){
     routine.completed = false;
   });
   localStorage.setItem("lastVisitDate", today);
 }
 
-routines.forEach(function(routine) {
-  if (!routine.id) routine.id = Date.now() + Math.random();
-  if (!routine.weekly) routine.weekly = [false, false, false, false, false, false, false];
-  if (routine.weeklyBonusGiven === undefined) routine.weeklyBonusGiven = false;
+routines.forEach(function(routine){
+  if(!routine.id) routine.id = Date.now() + Math.random();
+  if(!routine.weekly) routine.weekly = [false,false,false,false,false,false,false];
+  if(routine.weeklyBonusGiven === undefined) routine.weeklyBonusGiven = false;
 });
 
-function saveAll() {
+function saveAll(){
   localStorage.setItem("playerData", JSON.stringify(player));
   localStorage.setItem("routineData", JSON.stringify(routines));
   localStorage.setItem("lastVisitDate", today);
   localStorage.setItem("weekKey", currentWeekKey);
+  localStorage.setItem("monthlyData", JSON.stringify(monthly));
 }
 
-function addXp(statName, amount) {
+function addXp(statName, amount){
   let stat = player.stats[statName];
   stat.xp += amount;
-
-  while (stat.xp >= 100) {
+  while(stat.xp >= 100){
     stat.xp -= 100;
     stat.level += 1;
   }
 }
 
-function removeXp(statName, amount) {
+function removeXp(statName, amount){
   let stat = player.stats[statName];
   stat.xp -= amount;
-
-  while (stat.xp < 0 && stat.level > 1) {
+  while(stat.xp < 0 && stat.level > 1){
     stat.level -= 1;
     stat.xp += 100;
   }
-
-  if (stat.level === 1 && stat.xp < 0) {
-    stat.xp = 0;
-  }
+  if(stat.level === 1 && stat.xp < 0) stat.xp = 0;
 }
 
-function resetStats() {
-  if (!confirm("Reset all stats?")) {
-    return;
-  }
+function resetStats(){
+  if(!confirm("Reset all stats?")) return;
 
   player.stats = {
-    strength: { level: 1, xp: 0 },
-    intelligence: { level: 1, xp: 0 },
-    health: { level: 1, xp: 0 },
-    discipline: { level: 1, xp: 0 }
+    strength:{level:1,xp:0},
+    intelligence:{level:1,xp:0},
+    health:{level:1,xp:0},
+    discipline:{level:1,xp:0}
   };
 
   saveAll();
   updateStatus();
 }
 
-function updateStatus() {
+function updateStatus(){
   document.getElementById("playerName").textContent = player.name;
 
-  for (let statName in player.stats) {
+  for(let statName in player.stats){
     let stat = player.stats[statName];
-
-    document.getElementById(statName + "Text").textContent =
-      "Lv." + stat.level + " " + stat.xp + "/100";
-
-    document.getElementById(statName + "Bar").style.width =
-      stat.xp + "%";
+    document.getElementById(statName + "Text").textContent = "Lv." + stat.level + " " + stat.xp + "/100";
+    document.getElementById(statName + "Bar").style.width = stat.xp + "%";
   }
 }
 
-function addRoutine() {
+function addRoutine(){
   let name = document.getElementById("routineName").value.trim();
 
-  if (name === "") {
+  if(name === ""){
     alert("Routine name을 입력하세요.");
     return;
   }
@@ -319,13 +237,13 @@ function addRoutine() {
     id: Date.now(),
     name: name,
     completed: false,
-    weekly: [false, false, false, false, false, false, false],
+    weekly: [false,false,false,false,false,false,false],
     weeklyBonusGiven: false,
-    rewards: {
-      strength: Number(document.getElementById("strengthReward").value),
-      intelligence: Number(document.getElementById("intelligenceReward").value),
-      health: Number(document.getElementById("healthReward").value),
-      discipline: Number(document.getElementById("disciplineReward").value)
+    rewards:{
+      strength:Number(document.getElementById("strengthReward").value),
+      intelligence:Number(document.getElementById("intelligenceReward").value),
+      health:Number(document.getElementById("healthReward").value),
+      discipline:Number(document.getElementById("disciplineReward").value)
     }
   };
 
@@ -340,69 +258,93 @@ function addRoutine() {
   saveAll();
   updateRoutineList();
   updateWeeklyList();
+  updateMonthlyTracker();
 }
 
-function checkWeeklyBonus(routine) {
-  let fullWeek = routine.weekly.every(function(day) {
-    return day === true;
-  });
+function checkWeeklyBonus(routine){
+  let fullWeek = routine.weekly.every(function(day){ return day === true; });
 
-  if (fullWeek && !routine.weeklyBonusGiven) {
+  if(fullWeek && !routine.weeklyBonusGiven){
     addXp("discipline", 10);
     routine.weeklyBonusGiven = true;
     alert(routine.name + " weekly bonus! Discipline +10 XP");
   }
-
-  if (!fullWeek && routine.weeklyBonusGiven) {
-    removeXp("discipline", 10);
-    routine.weeklyBonusGiven = false;
-  }
 }
 
-function toggleRoutine(index) {
+function updateMonthlyTracker(){
+  let todayNumber = getTodayDateNumber();
+
+  let allDoneToday = routines.length > 0 && routines.every(function(routine){
+    return routine.completed === true;
+  });
+
+  if(allDoneToday){
+    monthly.checkedDays[todayNumber] = true;
+  }
+
+  let daysInMonth = getDaysInMonth();
+  let completedCount = 0;
+
+  for(let i = 1; i <= daysInMonth; i++){
+    if(monthly.checkedDays[i]) completedCount++;
+  }
+
+  if(completedCount === daysInMonth && !monthly.bonusGiven){
+    addXp("discipline", 50);
+    monthly.bonusGiven = true;
+    alert("Monthly bonus! Discipline +50 XP");
+  }
+
+  saveAll();
+  updateStatus();
+  updateMonthlyGrid();
+}
+
+function toggleRoutine(index){
   let routine = routines[index];
 
   routine.completed = !routine.completed;
   routine.weekly[todayIndex] = routine.completed;
 
-  for (let stat in routine.rewards) {
+  for(let stat in routine.rewards){
     let amount = routine.rewards[stat];
 
-    if (amount > 0) {
-      if (routine.completed) {
+    if(amount > 0){
+      if(routine.completed){
         addXp(stat, amount);
-      } else {
+      }else{
         removeXp(stat, amount);
       }
     }
   }
 
   checkWeeklyBonus(routine);
+  saveAll();
+  updateStatus();
+  updateRoutineList();
+  updateWeeklyList();
+  updateMonthlyTracker();
+}
+
+function deleteRoutine(index){
+  routines.splice(index,1);
 
   saveAll();
   updateStatus();
   updateRoutineList();
   updateWeeklyList();
+  updateMonthlyTracker();
 }
 
-function deleteRoutine(index) {
-  routines.splice(index, 1);
-
-  saveAll();
-  updateStatus();
-  updateRoutineList();
-  updateWeeklyList();
-}
-
-function updateRoutineList() {
+function updateRoutineList(){
   let list = document.getElementById("routineList");
   list.innerHTML = "";
 
-  routines.forEach(function(routine, index) {
+  routines.forEach(function(routine,index){
     let rewardText = "";
 
-    for (let stat in routine.rewards) {
-      if (routine.rewards[stat] > 0) {
+    for(let stat in routine.rewards){
+      if(routine.rewards[stat] > 0){
         rewardText += stat + " +" + routine.rewards[stat] + " XP<br>";
       }
     }
@@ -425,33 +367,73 @@ function updateRoutineList() {
   });
 }
 
-function updateWeeklyList() {
+function updateWeeklyList(){
   let list = document.getElementById("weeklyList");
   list.innerHTML = "";
 
-  routines.forEach(function(routine) {
+  routines.forEach(function(routine){
     let row = document.createElement("div");
     row.className = "weekly-row";
 
     let boxes = "";
 
-    for (let i = 0; i < 7; i++) {
+    for(let i = 0; i < 7; i++){
       boxes += '<input class="week-box" type="checkbox" disabled ' +
         (routine.weekly[i] ? "checked" : "") + '>';
     }
 
-    row.innerHTML =
-      '<div class="weekly-name">' + routine.name + '</div>' +
-      boxes;
-
+    row.innerHTML = '<div class="weekly-name">' + routine.name + '</div>' + boxes;
     list.appendChild(row);
   });
+}
+
+function updateMonthlyGrid(){
+  let d = new Date();
+  let year = d.getFullYear();
+  let month = d.getMonth() + 1;
+  let daysInMonth = getDaysInMonth();
+  let blanks = getFirstDayBlankCount();
+
+  document.getElementById("monthTitle").textContent = year + "년 " + month + "월";
+
+  let completedCount = 0;
+  for(let i = 1; i <= daysInMonth; i++){
+    if(monthly.checkedDays[i]) completedCount++;
+  }
+
+  document.getElementById("monthProgress").textContent =
+    completedCount + " / " + daysInMonth + " days completed";
+
+  let grid = document.getElementById("monthlyGrid");
+  grid.innerHTML = "";
+
+  let dayNames = ["M","T","W","T","F","S","S"];
+  dayNames.forEach(function(name){
+    let cell = document.createElement("div");
+    cell.className = "month-day-name";
+    cell.textContent = name;
+    grid.appendChild(cell);
+  });
+
+  for(let i = 0; i < blanks; i++){
+    let empty = document.createElement("div");
+    empty.className = "month-cell empty";
+    grid.appendChild(empty);
+  }
+
+  for(let day = 1; day <= daysInMonth; day++){
+    let cell = document.createElement("div");
+    cell.className = "month-cell" + (monthly.checkedDays[day] ? " done" : "");
+    cell.textContent = day;
+    grid.appendChild(cell);
+  }
 }
 
 saveAll();
 updateStatus();
 updateRoutineList();
 updateWeeklyList();
+updateMonthlyGrid();
 </script>
 
 </body>
