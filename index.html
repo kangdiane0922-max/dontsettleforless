@@ -19,13 +19,11 @@ body {
   border: 3px solid #222;
   border-radius: 16px;
   padding: 24px;
-  max-width: 520px;
+  max-width: 720px;
   margin: 0 auto 24px auto;
 }
 
-.stat {
-  margin: 18px 0;
-}
+.stat { margin: 18px 0; }
 
 .stat-title {
   display: flex;
@@ -61,9 +59,7 @@ button {
   cursor: pointer;
 }
 
-.add-button {
-  width: 100%;
-}
+.add-button { width: 100%; }
 
 .routine-card {
   border: 2px solid #222;
@@ -76,7 +72,6 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
 }
 
 .routine-left {
@@ -87,13 +82,35 @@ button {
 }
 
 .delete-button {
-  width: auto;
   color: red;
 }
 
 .reward-text {
   margin-top: 8px;
   font-size: 14px;
+}
+
+.weekly-row {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(7, 40px);
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.weekly-header {
+  font-weight: bold;
+  text-align: center;
+}
+
+.weekly-name {
+  font-weight: bold;
+}
+
+.week-box {
+  width: 26px;
+  height: 26px;
+  accent-color: hotpink;
 }
 </style>
 </head>
@@ -147,8 +164,41 @@ button {
   <div id="routineList"></div>
 </div>
 
+<div class="box">
+  <h2>Weekly Habits</h2>
+
+  <div class="weekly-row">
+    <div></div>
+    <div class="weekly-header">M</div>
+    <div class="weekly-header">T</div>
+    <div class="weekly-header">W</div>
+    <div class="weekly-header">T</div>
+    <div class="weekly-header">F</div>
+    <div class="weekly-header">S</div>
+    <div class="weekly-header">S</div>
+  </div>
+
+  <div id="weeklyList"></div>
+</div>
+
 <script>
 let today = new Date().toDateString();
+
+function getTodayIndex() {
+  let day = new Date().getDay();
+  return (day + 6) % 7;
+}
+
+function getWeekKey() {
+  let date = new Date();
+  let day = date.getDay();
+  let diff = date.getDate() - day + (day === 0 ? -6 : 1);
+  let monday = new Date(date.setDate(diff));
+  return monday.toISOString().slice(0, 10);
+}
+
+let todayIndex = getTodayIndex();
+let currentWeekKey = getWeekKey();
 
 let player = JSON.parse(localStorage.getItem("playerData")) || {
   name: "DIANA",
@@ -162,19 +212,35 @@ let player = JSON.parse(localStorage.getItem("playerData")) || {
 
 let routines = JSON.parse(localStorage.getItem("routineData")) || [];
 let lastVisitDate = localStorage.getItem("lastVisitDate");
+let savedWeekKey = localStorage.getItem("weekKey");
+
+if (savedWeekKey !== currentWeekKey) {
+  routines.forEach(function(routine) {
+    routine.weekly = [false, false, false, false, false, false, false];
+    routine.weeklyBonusGiven = false;
+    routine.completed = false;
+  });
+  localStorage.setItem("weekKey", currentWeekKey);
+}
 
 if (lastVisitDate !== today) {
   routines.forEach(function(routine) {
     routine.completed = false;
   });
   localStorage.setItem("lastVisitDate", today);
-  localStorage.setItem("routineData", JSON.stringify(routines));
 }
+
+routines.forEach(function(routine) {
+  if (!routine.id) routine.id = Date.now() + Math.random();
+  if (!routine.weekly) routine.weekly = [false, false, false, false, false, false, false];
+  if (routine.weeklyBonusGiven === undefined) routine.weeklyBonusGiven = false;
+});
 
 function saveAll() {
   localStorage.setItem("playerData", JSON.stringify(player));
   localStorage.setItem("routineData", JSON.stringify(routines));
   localStorage.setItem("lastVisitDate", today);
+  localStorage.setItem("weekKey", currentWeekKey);
 }
 
 function addXp(statName, amount) {
@@ -224,8 +290,11 @@ function addRoutine() {
   }
 
   let routine = {
+    id: Date.now(),
     name: name,
     completed: false,
+    weekly: [false, false, false, false, false, false, false],
+    weeklyBonusGiven: false,
     rewards: {
       strength: Number(document.getElementById("strengthReward").value),
       intelligence: Number(document.getElementById("intelligenceReward").value),
@@ -244,12 +313,31 @@ function addRoutine() {
 
   saveAll();
   updateRoutineList();
+  updateWeeklyList();
+}
+
+function checkWeeklyBonus(routine) {
+  let fullWeek = routine.weekly.every(function(day) {
+    return day === true;
+  });
+
+  if (fullWeek && !routine.weeklyBonusGiven) {
+    addXp("discipline", 10);
+    routine.weeklyBonusGiven = true;
+    alert(routine.name + " weekly bonus! Discipline +10 XP");
+  }
+
+  if (!fullWeek && routine.weeklyBonusGiven) {
+    removeXp("discipline", 10);
+    routine.weeklyBonusGiven = false;
+  }
 }
 
 function toggleRoutine(index) {
   let routine = routines[index];
 
   routine.completed = !routine.completed;
+  routine.weekly[todayIndex] = routine.completed;
 
   for (let stat in routine.rewards) {
     let amount = routine.rewards[stat];
@@ -263,9 +351,12 @@ function toggleRoutine(index) {
     }
   }
 
+  checkWeeklyBonus(routine);
+
   saveAll();
   updateStatus();
   updateRoutineList();
+  updateWeeklyList();
 }
 
 function deleteRoutine(index) {
@@ -274,11 +365,12 @@ function deleteRoutine(index) {
   if (routine.completed) {
     for (let stat in routine.rewards) {
       let amount = routine.rewards[stat];
-
-      if (amount > 0) {
-        removeXp(stat, amount);
-      }
+      if (amount > 0) removeXp(stat, amount);
     }
+  }
+
+  if (routine.weeklyBonusGiven) {
+    removeXp("discipline", 10);
   }
 
   routines.splice(index, 1);
@@ -286,6 +378,7 @@ function deleteRoutine(index) {
   saveAll();
   updateStatus();
   updateRoutineList();
+  updateWeeklyList();
 }
 
 function updateRoutineList() {
@@ -319,9 +412,33 @@ function updateRoutineList() {
   });
 }
 
+function updateWeeklyList() {
+  let list = document.getElementById("weeklyList");
+  list.innerHTML = "";
+
+  routines.forEach(function(routine) {
+    let row = document.createElement("div");
+    row.className = "weekly-row";
+
+    let boxes = "";
+
+    for (let i = 0; i < 7; i++) {
+      boxes += '<input class="week-box" type="checkbox" disabled ' +
+        (routine.weekly[i] ? "checked" : "") + '>';
+    }
+
+    row.innerHTML =
+      '<div class="weekly-name">' + routine.name + '</div>' +
+      boxes;
+
+    list.appendChild(row);
+  });
+}
+
 saveAll();
 updateStatus();
 updateRoutineList();
+updateWeeklyList();
 </script>
 
 </body>
