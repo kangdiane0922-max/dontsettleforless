@@ -3,20 +3,121 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Website</title>
+<title>My RPG Page</title>
 
 <style>
-body{
-    margin:0;
-    height:100vh;
-    background:#87CEEB;
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: skyblue;
+  font-family: Arial, sans-serif;
+  padding: 30px;
+}
+
+.status-box {
+  background: white;
+  border: 3px solid #222;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 520px;
+  margin: auto;
+}
+
+.stat {
+  margin: 18px 0;
+}
+
+.stat-title {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.bar {
+  height: 22px;
+  border: 2px solid #222;
+  background: #eee;
+}
+
+.fill {
+  height: 100%;
+  background: hotpink;
+  width: 0%;
 }
 </style>
-
 </head>
 
 <body>
 
-</body>
+<div class="status-box">
+  <h1 id="playerName">DIANA</h1>
 
+  <div class="stat">
+    <div class="stat-title">
+      <span>Strength</span>
+      <span id="strengthText"></span>
+    </div>
+    <div class="bar"><div id="strengthBar" class="fill"></div></div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-title">
+      <span>Intelligence</span>
+      <span id="intelligenceText"></span>
+    </div>
+    <div class="bar"><div id="intelligenceBar" class="fill"></div></div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-title">
+      <span>Health</span>
+      <span id="healthText"></span>
+    </div>
+    <div class="bar"><div id="healthBar" class="fill"></div></div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-title">
+      <span>Discipline</span>
+      <span id="disciplineText"></span>
+    </div>
+    <div class="bar"><div id="disciplineBar" class="fill"></div></div>
+  </div>
+</div>
+
+<script>
+let player = JSON.parse(localStorage.getItem("playerData")) || {
+  name: "DIANA",
+  stats: {
+    strength: { level: 1, xp: 0 },
+    intelligence: { level: 1, xp: 0 },
+    health: { level: 1, xp: 0 },
+    discipline: { level: 1, xp: 0 }
+  }
+};
+
+function savePlayer() {
+  localStorage.setItem("playerData", JSON.stringify(player));
+}
+
+function updateScreen() {
+  document.getElementById("playerName").textContent = player.name;
+
+  for (let statName in player.stats) {
+    let stat = player.stats[statName];
+
+    document.getElementById(statName + "Text").textContent =
+      "Lv." + stat.level + " " + stat.xp + "/100";
+
+    document.getElementById(statName + "Bar").style.width =
+      stat.xp + "%";
+  }
+}
+
+savePlayer();
+updateScreen();
+</script>
+
+</body>
 </html>
