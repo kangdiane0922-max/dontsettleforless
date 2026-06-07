@@ -54,11 +54,14 @@ input {
 }
 
 button {
-  padding: 12px;
+  padding: 10px;
   border: 2px solid #222;
   background: white;
   font-weight: bold;
   cursor: pointer;
+}
+
+.add-button {
   width: 100%;
 }
 
@@ -67,6 +70,30 @@ button {
   padding: 14px;
   margin-top: 12px;
   background: #f7f7f7;
+}
+
+.routine-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.routine-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+}
+
+.delete-button {
+  width: auto;
+  color: red;
+}
+
+.reward-text {
+  margin-top: 8px;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -115,12 +142,14 @@ button {
   <label>Discipline XP</label>
   <input id="disciplineReward" type="number" value="0">
 
-  <button onclick="addRoutine()">Add Routine</button>
+  <button class="add-button" onclick="addRoutine()">Add Routine</button>
 
   <div id="routineList"></div>
 </div>
 
 <script>
+let today = new Date().toDateString();
+
 let player = JSON.parse(localStorage.getItem("playerData")) || {
   name: "DIANA",
   stats: {
@@ -132,10 +161,44 @@ let player = JSON.parse(localStorage.getItem("playerData")) || {
 };
 
 let routines = JSON.parse(localStorage.getItem("routineData")) || [];
+let lastVisitDate = localStorage.getItem("lastVisitDate");
+
+if (lastVisitDate !== today) {
+  routines.forEach(function(routine) {
+    routine.completed = false;
+  });
+  localStorage.setItem("lastVisitDate", today);
+  localStorage.setItem("routineData", JSON.stringify(routines));
+}
 
 function saveAll() {
   localStorage.setItem("playerData", JSON.stringify(player));
   localStorage.setItem("routineData", JSON.stringify(routines));
+  localStorage.setItem("lastVisitDate", today);
+}
+
+function addXp(statName, amount) {
+  let stat = player.stats[statName];
+  stat.xp += amount;
+
+  while (stat.xp >= 100) {
+    stat.xp -= 100;
+    stat.level += 1;
+  }
+}
+
+function removeXp(statName, amount) {
+  let stat = player.stats[statName];
+  stat.xp -= amount;
+
+  while (stat.xp < 0 && stat.level > 1) {
+    stat.level -= 1;
+    stat.xp += 100;
+  }
+
+  if (stat.level === 1 && stat.xp < 0) {
+    stat.xp = 0;
+  }
 }
 
 function updateStatus() {
@@ -162,6 +225,7 @@ function addRoutine() {
 
   let routine = {
     name: name,
+    completed: false,
     rewards: {
       strength: Number(document.getElementById("strengthReward").value),
       intelligence: Number(document.getElementById("intelligenceReward").value),
@@ -182,11 +246,53 @@ function addRoutine() {
   updateRoutineList();
 }
 
+function toggleRoutine(index) {
+  let routine = routines[index];
+
+  routine.completed = !routine.completed;
+
+  for (let stat in routine.rewards) {
+    let amount = routine.rewards[stat];
+
+    if (amount > 0) {
+      if (routine.completed) {
+        addXp(stat, amount);
+      } else {
+        removeXp(stat, amount);
+      }
+    }
+  }
+
+  saveAll();
+  updateStatus();
+  updateRoutineList();
+}
+
+function deleteRoutine(index) {
+  let routine = routines[index];
+
+  if (routine.completed) {
+    for (let stat in routine.rewards) {
+      let amount = routine.rewards[stat];
+
+      if (amount > 0) {
+        removeXp(stat, amount);
+      }
+    }
+  }
+
+  routines.splice(index, 1);
+
+  saveAll();
+  updateStatus();
+  updateRoutineList();
+}
+
 function updateRoutineList() {
   let list = document.getElementById("routineList");
   list.innerHTML = "";
 
-  routines.forEach(function(routine) {
+  routines.forEach(function(routine, index) {
     let rewardText = "";
 
     for (let stat in routine.rewards) {
@@ -197,7 +303,17 @@ function updateRoutineList() {
 
     let card = document.createElement("div");
     card.className = "routine-card";
-    card.innerHTML = "<strong>" + routine.name + "</strong><br>" + rewardText;
+
+    card.innerHTML =
+      '<div class="routine-top">' +
+        '<div class="routine-left">' +
+          '<input type="checkbox" ' + (routine.completed ? "checked" : "") +
+          ' onchange="toggleRoutine(' + index + ')">' +
+          '<span>' + routine.name + '</span>' +
+        '</div>' +
+        '<button class="delete-button" onclick="deleteRoutine(' + index + ')">Delete</button>' +
+      '</div>' +
+      '<div class="reward-text">' + rewardText + '</div>';
 
     list.appendChild(card);
   });
