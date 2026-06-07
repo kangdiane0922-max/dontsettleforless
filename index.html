@@ -59,7 +59,15 @@ button {
   cursor: pointer;
 }
 
-.add-button { width: 100%; }
+.add-button,
+.reset-button {
+  width: 100%;
+}
+
+.reset-button {
+  margin-bottom: 16px;
+  color: red;
+}
 
 .routine-card {
   border: 2px solid #222;
@@ -119,6 +127,8 @@ button {
 
 <div class="box">
   <h1 id="playerName">DIANA</h1>
+
+  <button class="reset-button" onclick="resetStats()">Reset All Stats</button>
 
   <div class="stat">
     <div class="stat-title"><span>Strength</span><span id="strengthText"></span></div>
@@ -267,6 +277,22 @@ function removeXp(statName, amount) {
   }
 }
 
+function resetStats() {
+  if (!confirm("Reset all stats?")) {
+    return;
+  }
+
+  player.stats = {
+    strength: { level: 1, xp: 0 },
+    intelligence: { level: 1, xp: 0 },
+    health: { level: 1, xp: 0 },
+    discipline: { level: 1, xp: 0 }
+  };
+
+  saveAll();
+  updateStatus();
+}
+
 function updateStatus() {
   document.getElementById("playerName").textContent = player.name;
 
@@ -360,19 +386,6 @@ function toggleRoutine(index) {
 }
 
 function deleteRoutine(index) {
-  let routine = routines[index];
-
-  if (routine.completed) {
-    for (let stat in routine.rewards) {
-      let amount = routine.rewards[stat];
-      if (amount > 0) removeXp(stat, amount);
-    }
-  }
-
-  if (routine.weeklyBonusGiven) {
-    removeXp("discipline", 10);
-  }
-
   routines.splice(index, 1);
 
   saveAll();
