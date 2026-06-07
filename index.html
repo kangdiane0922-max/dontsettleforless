@@ -54,6 +54,8 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .project-side{border:2px solid #222;background:#f7f7f7;padding:12px;max-height:520px;overflow:auto}
 .side-project-title{font-weight:bold;margin-top:10px}
 .side-task{border:1px solid #222;background:white;padding:8px;margin:6px 0;cursor:grab}
+.mobile-date{width:100%;padding:6px;margin-top:6px;font-size:12px}
+.date-label{font-size:11px;font-weight:bold;margin-top:6px}
 </style>
 </head>
 
@@ -122,12 +124,11 @@ button:disabled{opacity:.4;cursor:not-allowed}
     </div>
     <div class="project-side">
       <h3>Project Tasks</h3>
-      <p style="font-size:12px;">Drag a sub task to a date.</p>
+      <p style="font-size:12px;">PC: drag task / Phone: use Set Date.</p>
       <div id="calendarTaskList"></div>
     </div>
   </div>
 </div>
-
 <script>
 let today=new Date().toDateString();
 let calendarOffset=0;
@@ -278,12 +279,23 @@ function addDday(){
   if(name===""){alert("Schedule name을 입력하세요.");return}
   if(date===""){alert("Target date를 선택하세요.");return}
   if(getDaysLeft(date)<0){alert("지난 날짜는 추가할 수 없습니다.");return}
+
   ddays.push({id:Date.now(),name:name,date:date});
-  document.getElementById("ddayName").value="";document.getElementById("ddayDate").value="";
-  saveAll();updateDdayList();
+
+  document.getElementById("ddayName").value="";
+  document.getElementById("ddayDate").value="";
+
+  saveAll();
+  updateDdayList();
+  updateCalendar();
 }
 
-function completeDday(index){ddays.splice(index,1);saveAll();updateDdayList()}
+function completeDday(index){
+  ddays.splice(index,1);
+  saveAll();
+  updateDdayList();
+  updateCalendar();
+}
 
 function updateDdayList(){
   cleanExpiredDdays();ddays.sort((a,b)=>getDaysLeft(a.date)-getDaysLeft(b.date));
@@ -371,6 +383,16 @@ function startDrag(projectIndex,subtaskIndex){
   draggedTask={projectIndex:projectIndex,subtaskIndex:subtaskIndex};
 }
 
+function scheduleSubtask(projectIndex,subtaskIndex,dateValue){
+  if(!dateValue)return;
+  let project=projects[projectIndex];
+  if(!project||!project.subtasks[subtaskIndex])return;
+  project.subtasks[subtaskIndex].scheduledDate=dateValue;
+  saveAll();
+  updateProjectList();
+  updateCalendar();
+}
+
 function dropOnDate(dateKey){
   if(!draggedTask)return;
   let p=projects[draggedTask.projectIndex];
@@ -429,6 +451,15 @@ function updateCalendarGrid(){
       });
     });
 
+    ddays.forEach((item,index)=>{
+      if(item.date===dateKey){
+        let daysLeft=getDaysLeft(item.date);
+        let ddayText=daysLeft===0?"D-Day":"D-"+daysLeft;
+
+        tasksHtml+='<div class="cal-task"><strong>🎯 '+item.name+'</strong><br><small>'+ddayText+'</small><br><button onclick="completeDday('+index+')">Complete</button></div>';
+      }
+    });
+
     cell.innerHTML=tasksHtml;
     grid.appendChild(cell);
   }
@@ -443,7 +474,12 @@ function updateCalendarTaskList(){
     let html='<div class="side-project-title">'+project.name+'</div>';
 
     project.subtasks.forEach((task,subtaskIndex)=>{
-      html+='<div class="side-task" draggable="true" ondragstart="startDrag('+projectIndex+','+subtaskIndex+')">'+task.title+(task.scheduledDate?'<br><small>'+task.scheduledDate+'</small>':'')+'</div>';
+      html+='<div class="side-task" draggable="true" ondragstart="startDrag('+projectIndex+','+subtaskIndex+')">'+
+        '<strong>'+task.title+'</strong>'+
+        (task.scheduledDate?'<br><small>Scheduled: '+task.scheduledDate+'</small>':'')+
+        '<div class="date-label">Set Date</div>'+
+        '<input class="mobile-date" type="date" value="'+task.scheduledDate+'" onchange="scheduleSubtask('+projectIndex+','+subtaskIndex+', this.value)">'+
+      '</div>';
     });
 
     projectBlock.innerHTML=html;
