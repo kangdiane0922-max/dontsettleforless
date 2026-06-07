@@ -14,13 +14,13 @@ body {
   padding: 30px;
 }
 
-.status-box {
+.box {
   background: white;
   border: 3px solid #222;
   border-radius: 16px;
   padding: 24px;
   max-width: 520px;
-  margin: auto;
+  margin: 0 auto 24px auto;
 }
 
 .stat {
@@ -45,45 +45,79 @@ body {
   background: hotpink;
   width: 0%;
 }
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 12px 0;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 12px;
+  border: 2px solid #222;
+  background: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.routine-card {
+  border: 2px solid #222;
+  padding: 14px;
+  margin-top: 12px;
+  background: #f7f7f7;
+}
 </style>
 </head>
 
 <body>
 
-<div class="status-box">
+<div class="box">
   <h1 id="playerName">DIANA</h1>
 
   <div class="stat">
-    <div class="stat-title">
-      <span>Strength</span>
-      <span id="strengthText"></span>
-    </div>
+    <div class="stat-title"><span>Strength</span><span id="strengthText"></span></div>
     <div class="bar"><div id="strengthBar" class="fill"></div></div>
   </div>
 
   <div class="stat">
-    <div class="stat-title">
-      <span>Intelligence</span>
-      <span id="intelligenceText"></span>
-    </div>
+    <div class="stat-title"><span>Intelligence</span><span id="intelligenceText"></span></div>
     <div class="bar"><div id="intelligenceBar" class="fill"></div></div>
   </div>
 
   <div class="stat">
-    <div class="stat-title">
-      <span>Health</span>
-      <span id="healthText"></span>
-    </div>
+    <div class="stat-title"><span>Health</span><span id="healthText"></span></div>
     <div class="bar"><div id="healthBar" class="fill"></div></div>
   </div>
 
   <div class="stat">
-    <div class="stat-title">
-      <span>Discipline</span>
-      <span id="disciplineText"></span>
-    </div>
+    <div class="stat-title"><span>Discipline</span><span id="disciplineText"></span></div>
     <div class="bar"><div id="disciplineBar" class="fill"></div></div>
   </div>
+</div>
+
+<div class="box">
+  <h2>Routine</h2>
+
+  <label>Routine name</label>
+  <input id="routineName" type="text" placeholder="ex) Cycling 1 hour">
+
+  <label>Strength XP</label>
+  <input id="strengthReward" type="number" value="0">
+
+  <label>Intelligence XP</label>
+  <input id="intelligenceReward" type="number" value="0">
+
+  <label>Health XP</label>
+  <input id="healthReward" type="number" value="0">
+
+  <label>Discipline XP</label>
+  <input id="disciplineReward" type="number" value="0">
+
+  <button onclick="addRoutine()">Add Routine</button>
+
+  <div id="routineList"></div>
 </div>
 
 <script>
@@ -97,11 +131,14 @@ let player = JSON.parse(localStorage.getItem("playerData")) || {
   }
 };
 
-function savePlayer() {
+let routines = JSON.parse(localStorage.getItem("routineData")) || [];
+
+function saveAll() {
   localStorage.setItem("playerData", JSON.stringify(player));
+  localStorage.setItem("routineData", JSON.stringify(routines));
 }
 
-function updateScreen() {
+function updateStatus() {
   document.getElementById("playerName").textContent = player.name;
 
   for (let statName in player.stats) {
@@ -115,8 +152,60 @@ function updateScreen() {
   }
 }
 
-savePlayer();
-updateScreen();
+function addRoutine() {
+  let name = document.getElementById("routineName").value.trim();
+
+  if (name === "") {
+    alert("Routine name을 입력하세요.");
+    return;
+  }
+
+  let routine = {
+    name: name,
+    rewards: {
+      strength: Number(document.getElementById("strengthReward").value),
+      intelligence: Number(document.getElementById("intelligenceReward").value),
+      health: Number(document.getElementById("healthReward").value),
+      discipline: Number(document.getElementById("disciplineReward").value)
+    }
+  };
+
+  routines.push(routine);
+
+  document.getElementById("routineName").value = "";
+  document.getElementById("strengthReward").value = 0;
+  document.getElementById("intelligenceReward").value = 0;
+  document.getElementById("healthReward").value = 0;
+  document.getElementById("disciplineReward").value = 0;
+
+  saveAll();
+  updateRoutineList();
+}
+
+function updateRoutineList() {
+  let list = document.getElementById("routineList");
+  list.innerHTML = "";
+
+  routines.forEach(function(routine) {
+    let rewardText = "";
+
+    for (let stat in routine.rewards) {
+      if (routine.rewards[stat] > 0) {
+        rewardText += stat + " +" + routine.rewards[stat] + " XP<br>";
+      }
+    }
+
+    let card = document.createElement("div");
+    card.className = "routine-card";
+    card.innerHTML = "<strong>" + routine.name + "</strong><br>" + rewardText;
+
+    list.appendChild(card);
+  });
+}
+
+saveAll();
+updateStatus();
+updateRoutineList();
 </script>
 
 </body>
