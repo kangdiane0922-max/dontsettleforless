@@ -280,6 +280,28 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 
 
+.bucket-card{
+
+  border:2px solid #222;
+
+  background:#f7f7f7;
+
+  padding:12px;
+
+  margin-top:10px;
+
+}
+
+
+
+.bucket-done{
+
+  background:#d5ffd5;
+
+}
+
+
+
 </style>
 
 </head>
@@ -458,6 +480,28 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 <div class="box">
 
+  <h2>Bucket List</h2>
+
+
+
+  <label>Bucket item</label>
+
+  <input id="bucketInput" type="text" placeholder="ex) 제주도 자전거 여행">
+
+
+
+  <button class="add-button" onclick="addBucketItem()">Add Bucket</button>
+
+
+
+  <div id="bucketList"></div>
+
+</div>
+
+
+
+<div class="box">
+
   <h2>Weekly Planner</h2>
 
 
@@ -533,6 +577,12 @@ JSON.parse(localStorage.getItem("weeklyItems"))||[];
 let goals=
 
 JSON.parse(localStorage.getItem("goalData"))||[];
+
+
+
+let bucketItems=
+
+JSON.parse(localStorage.getItem("bucketData"))||[];
 
 
 
@@ -633,6 +683,16 @@ localStorage.setItem(
 "goalData",
 
 JSON.stringify(goals)
+
+);
+
+
+
+localStorage.setItem(
+
+  "bucketData",
+
+  JSON.stringify(bucketItems)
 
 );
 
@@ -982,7 +1042,15 @@ function completeProject(projectIndex){
 
   projects.splice(projectIndex,1);
 
-  saveAll();updateProjectList();updateCalendar();
+
+
+  saveAll();
+
+  updateProjectList();
+
+  updateCalendar();
+
+  updateWeeklyPlanner();
 
 }
 
@@ -1814,6 +1882,134 @@ function updateGoalList(){
 
 
 
+function addBucketItem(){
+
+  let text=document.getElementById("bucketInput").value.trim();
+
+
+
+  if(text===""){
+
+    alert("버킷리스트 내용을 입력하세요.");
+
+    return;
+
+  }
+
+
+
+  bucketItems.push({
+
+  id:Date.now(),
+
+  text:text,
+
+  done:false,
+
+  completedDate:""
+
+});
+
+  document.getElementById("bucketInput").value="";
+
+
+
+  saveAll();
+
+  updateBucketList();
+
+}
+
+
+
+function toggleBucketItem(index){
+
+
+
+  bucketItems[index].done=!bucketItems[index].done;
+
+
+
+  if(bucketItems[index].done){
+
+    bucketItems[index].completedDate=
+
+      new Date().toLocaleDateString();
+
+  }else{
+
+    bucketItems[index].completedDate="";
+
+  }
+
+
+
+  saveAll();
+
+  updateBucketList();
+
+}
+
+
+
+function deleteBucketItem(index){
+
+  if(!confirm("Delete this bucket item?"))return;
+
+  bucketItems.splice(index,1);
+
+  saveAll();
+
+  updateBucketList();
+
+}
+
+
+
+function updateBucketList(){
+
+  let list=document.getElementById("bucketList");
+
+  if(!list)return;
+
+
+
+  list.innerHTML="";
+
+
+
+  bucketItems.forEach(function(item,index){
+
+    let card=document.createElement("div");
+
+    card.className="bucket-card"+(item.done?" bucket-done":"");
+
+
+
+    card.innerHTML=
+
+      '<input type="checkbox" '+(item.done?"checked":"")+' onchange="toggleBucketItem('+index+')"> '+
+
+      '<span>'+item.text+'</span>'+
+
+(item.completedDate
+
+ ? '<br><small>달성일 : '+item.completedDate+'</small>'
+
+ : '')+
+
+      '<button class="delete-button" style="float:right;" onclick="deleteBucketItem('+index+')">Delete</button>';
+
+
+
+    list.appendChild(card);
+
+  });
+
+}
+
+
+
 cleanOldWeeklyItems();
 
 
@@ -1838,6 +2034,8 @@ updateWeeklyPlanner();
 
 updateGoalList();
 
+updateBucketList();
+
 </script>
 
 
@@ -1845,3 +2043,4 @@ updateGoalList();
 </body>
 
 </html>
+
