@@ -12,6 +12,8 @@
 
 
 
+
+
 <style>
 
 body{margin:0;min-height:100vh;background:skyblue;font-family:Arial,sans-serif;padding:30px}
@@ -226,6 +228,58 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 
 
+.goal-card{
+
+  border:2px solid #222;
+
+  background:#f7f7f7;
+
+  padding:14px;
+
+  margin-top:12px;
+
+}
+
+
+
+.goal-top{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+}
+
+
+
+.goal-title{
+
+  font-size:20px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+
+
+.review-box{
+
+  border:2px solid #222;
+
+  background:white;
+
+  padding:12px;
+
+  margin-top:12px;
+
+}
+
+
+
 </style>
 
 </head>
@@ -376,6 +430,34 @@ button:disabled{opacity:.4;cursor:not-allowed}
 
 <div class="box">
 
+  <h2>Long Term Goals</h2>
+
+
+
+  <label>Main Goal</label>
+
+  <input id="goalTitle" type="text" placeholder="ex) 전기기사 취득">
+
+
+
+  <label>Months</label>
+
+  <input id="goalMonths" type="number" min="1" placeholder="ex) 5">
+
+
+
+  <button class="add-button" onclick="addGoal()">Add Goal</button>
+
+
+
+  <div id="goalList"></div>
+
+</div>
+
+
+
+<div class="box">
+
   <h2>Weekly Planner</h2>
 
 
@@ -445,6 +527,12 @@ let weekOffset=0;
 let weeklyItems=
 
 JSON.parse(localStorage.getItem("weeklyItems"))||[];
+
+
+
+let goals=
+
+JSON.parse(localStorage.getItem("goalData"))||[];
 
 
 
@@ -535,6 +623,16 @@ function saveAll(){
   "weeklyItems",
 
   JSON.stringify(weeklyItems)
+
+);
+
+
+
+localStorage.setItem(
+
+"goalData",
+
+JSON.stringify(goals)
 
 );
 
@@ -1542,6 +1640,180 @@ function cleanOldWeeklyItems(){
 
 
 
+function addGoal(){
+
+  let title=document.getElementById("goalTitle").value.trim();
+
+  let months=Number(document.getElementById("goalMonths").value);
+
+
+
+  if(title===""){
+
+    alert("목표 이름을 입력하세요.");
+
+    return;
+
+  }
+
+
+
+  if(!months || months<1){
+
+    alert("개월 수를 입력하세요.");
+
+    return;
+
+  }
+
+
+
+  let reviews=[];
+
+  for(let i=0;i<months;i++){
+
+    reviews.push("");
+
+  }
+
+
+
+  goals.push({
+
+    id:Date.now(),
+
+    title:title,
+
+    months:months,
+
+    opened:false,
+
+    reviews:reviews
+
+  });
+
+
+
+  document.getElementById("goalTitle").value="";
+
+  document.getElementById("goalMonths").value="";
+
+
+
+  saveAll();
+
+  updateGoalList();
+
+}
+
+
+
+function toggleGoal(index){
+
+  goals[index].opened=!goals[index].opened;
+
+  saveAll();
+
+  updateGoalList();
+
+}
+
+
+
+function updateGoalReview(goalIndex,monthIndex,value){
+
+  goals[goalIndex].reviews[monthIndex]=value;
+
+  saveAll();
+
+}
+
+
+
+function deleteGoal(index){
+
+  if(!confirm("Delete this goal?"))return;
+
+  goals.splice(index,1);
+
+  saveAll();
+
+  updateGoalList();
+
+}
+
+
+
+function updateGoalList(){
+
+  let list=document.getElementById("goalList");
+
+  if(!list)return;
+
+
+
+  list.innerHTML="";
+
+
+
+  goals.forEach(function(goal,goalIndex){
+
+    let reviewHtml="";
+
+
+
+    if(goal.opened){
+
+      for(let i=0;i<goal.months;i++){
+
+        reviewHtml+=
+
+          '<div class="review-box">'+
+
+            '<div class="review-title">'+(i+1)+'개월차 회고</div>'+
+
+            '<textarea placeholder="이번 달 회고를 적으세요" oninput="updateGoalReview('+goalIndex+','+i+', this.value)">'+
+
+              goal.reviews[i]+
+
+            '</textarea>'+
+
+          '</div>';
+
+      }
+
+    }
+
+
+
+    let card=document.createElement("div");
+
+    card.className="goal-card";
+
+
+
+    card.innerHTML=
+
+      '<div class="goal-top">'+
+
+        '<div class="goal-title" onclick="toggleGoal('+goalIndex+')">'+goal.title+' / '+goal.months+'개월</div>'+
+
+        '<button class="delete-button" onclick="deleteGoal('+goalIndex+')">Delete</button>'+
+
+      '</div>'+
+
+      reviewHtml;
+
+
+
+    list.appendChild(card);
+
+  });
+
+}
+
+
+
 cleanOldWeeklyItems();
 
 
@@ -1564,6 +1836,8 @@ updateCalendar();
 
 updateWeeklyPlanner();
 
+updateGoalList();
+
 </script>
 
 
@@ -1571,4 +1845,3 @@ updateWeeklyPlanner();
 </body>
 
 </html>
-
